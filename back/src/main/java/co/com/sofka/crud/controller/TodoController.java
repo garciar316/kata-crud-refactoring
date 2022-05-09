@@ -41,7 +41,7 @@ public class TodoController {
             return ResponseEntity.ok(mapper.mapToTodoDTO(todoService.save(mapper.mapToTodo(todoDTO))));
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.internalServerError().build();
         }
     }
 
