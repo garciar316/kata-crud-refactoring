@@ -1,47 +1,48 @@
 import React, { useContext, useEffect } from 'react';
-import {TodoContext} from '../../context/TodoContext';
-import {actions} from '../../components/Reducer/actions';
+import { TodoContext } from '../../context/TodoContext';
+import { actions } from '../../components/Reducer/actions';
 import { getTodos, deleteTodo, updateTodo } from '../../services/TodoService';
+import { FaPen, FaTrash } from 'react-icons/fa';
 
-const ListTodo = () => {
-    const { dispatch, setTodoEditing, state: { todo } } = useContext(TodoContext);
-    const currentList = todo.list;
+const ListTodo = (props) => {
+    const { todosDispatch, setTodoEditing, todos } = useContext(TodoContext);
+    const _todos = todos.filter((todo) => todo.todoList?.id === props.list.id);
 
     useEffect(() => {
         (async function () {
-            const {status, data} = await getTodos();
+            const { status, data } = await getTodos();
             if (status === 200) {
-                dispatch({ type: actions.UPDATE_LIST, payload: data });
+                todosDispatch({ type: actions.UPDATE_LIST, payload: data });
             }
-        }) ();
-    }, [dispatch]);
+        })();
+    }, [todosDispatch]);
 
     const onDelete = (id) => {
         (async function () {
-            const {status} = await deleteTodo(id);
+            const { status } = await deleteTodo(id);
             if (status === 200) {
-                dispatch({ type: actions.DELETE, payload: id });
+                todosDispatch({ type: actions.DELETE, payload: id });
             }
-        }) ();
+        })();
     };
 
-    const onEdit = (_todo) => {
-        setTodoEditing(true);
-        dispatch({ type: actions.EDIT, payload: _todo });
+    const onEdit = (todo) => {
+        setTodoEditing(todo);
     };
 
-    const onChange = (event, _todo) => {
+    const onChange = (event, todo) => {
         const request = {
-            name: _todo.name,
-            id: _todo.id,
-            completed: event.target.checked
+            name: todo.name,
+            id: todo.id,
+            completed: event.target.checked,
+            todoList: props.list
         };
         (async function () {
-            const {status, data} = await updateTodo(request);
+            const { status, data } = await updateTodo(request);
             if (status === 200) {
-                dispatch({ type: actions.UPDATE, payload: data });
+                todosDispatch({ type: actions.UPDATE, payload: data });
             }
-        }) ();
+        })();
     };
 
     const decorationDone = {
@@ -49,22 +50,33 @@ const ListTodo = () => {
     };
     return (
         <div>
-            <table >
+            <table className="table table-hover">
                 <thead>
                     <tr>
-                        <td>ID</td>
-                        <td>Tarea</td>
-                        <td>¿Completado?</td>
+                        <th className="text-center">Ok?</th>
+                        <th className="text-center">Tarea</th>
+                        <th className="text-center">Eliminar</th>
+                        <th className="text-center">Editar</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {currentList.map((_todo) =>
-                        <tr key={_todo.id} style={_todo.completed ? decorationDone : {}}>
-                            <td>{_todo.id}</td>
-                            <td>{_todo.name}</td>
-                            <td><input type="checkbox" defaultChecked={_todo.completed} onChange={(event) => onChange(event, _todo)}></input></td>
-                            <td><button onClick={() => onDelete(_todo.id)}>Eliminar</button></td>
-                            <td><button onClick={() => onEdit(_todo)}>Editar</button></td>
+                    {_todos.map((todo) =>
+                        <tr key={todo.id} style={todo.completed ? decorationDone : {}}>
+                            <td className="text-center">
+                                <input
+                                    type="checkbox"
+                                    defaultChecked={todo.completed}
+                                    className="form-check-input"
+                                    onChange={(event) => onChange(event, todo)}
+                                />
+                            </td>
+                            <td className="text-center">{todo.id}. {todo.name}</td>
+                            <td className="text-center">
+                                <button className="btn btn-outline-danger" onClick={() => onDelete(todo.id)}><FaTrash /></button>
+                            </td>
+                            <td className="text-center">
+                                <button className="btn btn-outline-success" onClick={() => onEdit(todo)}><FaPen /></button>
+                            </td>
                         </tr>
                     )}
                 </tbody>

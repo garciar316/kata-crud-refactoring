@@ -1,6 +1,6 @@
 export const actions = {
     ADD: 'add',
-    EDIT: 'edit',
+    UPDATE: 'edit',
     DELETE: 'delete',
-    UPDATE: 'update',
+    UPDATE_LIST: 'update_list'
 }

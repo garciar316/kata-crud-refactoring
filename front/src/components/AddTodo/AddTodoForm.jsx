@@ -4,32 +4,38 @@ import { actions } from '../Reducer/actions';
 import { addTodo } from '../../services/TodoService';
 import { useForm } from 'react-hook-form';
 
-const AddTodoForm = () => {
-    const { dispatch } = useContext(TodoContext);
+const AddTodoForm = (props) => {
+    const { todosDispatch } = useContext(TodoContext);
     const { register, handleSubmit, formState: { errors } } = useForm();
 
     const onAdd = (formData, event) => {
         const request = {
             name: formData.name,
-            completed: false
+            completed: false,
+            todoList: props.list
         };
         (async function () {
             const { status, data } = await addTodo(request);
             if (status === 200) {
-                dispatch({ type: actions.ADD, payload: data });
+                todosDispatch({ type: actions.ADD, payload: data });
             }
         })();
         event.target.reset();
     }
     return (
-        <div>
-            <form onSubmit={handleSubmit(onAdd)}>
-                <input
+        <div className="mb-3">
+            <form onSubmit={handleSubmit(onAdd)} className="row">
+                <div className="col-md-8">
+                    <input
                     type="text"
                     placeholder="¿Qué piensas hacer hoy?"
+                    className="form-control"
                     {...register('name', { required: true, message: 'Este campo es requerido' })}
                     ></input>
-                <input type="submit" value="Crear" />
+                </div>
+                <div className="col-md-4">
+                    <input className="form-control btn btn-primary" type="submit" value="Crear" />
+                </div>
             </form>
             <div>
                 {errors?.name?.message}
